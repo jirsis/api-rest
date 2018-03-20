@@ -1,0 +1,10 @@
+{
+  "name": "api-rest-keynote",
+  "version": "1.0.0",
+  "description": "Presentación y explicación de como definir APIs ReST y como publicarlas con WSO2-Api Manager",
+  "author": "Iñaki Reta Sabarrós",
+  "license": "MIT",
+  "dependencies": {
+    "reveal.js": "^3.6.0"
+  }
+}

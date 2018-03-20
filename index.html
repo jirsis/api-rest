@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<title>API ReST + WSO2-AM</title>
+
+<meta name="description" content="SOLID principios">
+<meta name="author" content="J. Ignacio Reta Sabarrós">
+
+<link rel="stylesheet" href="node_modules/reveal.js/css/reveal.css">
+<link rel="stylesheet" href="node_modules/reveal.js/css/theme/beige.css" id="theme">
+</head>
+
+<body>
+  <div class="reveal">
+  <div class="slides">
+    <section>
+      <h1>API ReST<h1/>
+      <h3>+</h3>
+      <h1>WSO2-AM</h1>
+    </section>
+
+    <section>
+      <section>
+        <h2>¿Qué son APIs ReST</h2>
+      </section>
+      <section data-markdown>
+      <script type="text/template">
+        ## ¿Qué es un API?
+        * Un API es una Interfaz de Programación de Aplicación
+        * Es un contrato entre dos partes
+          + un front y un back
+          + un objeto y otro
+          + ...
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ## ¿Y ReST?
+          * Son las siglas de Representative State Transfer <!-- .element: class="fragment" data-fragment-index="0" -->
+          * La representación del negocio ofrecida al consumidor debe acercarse lo más posible a su visión <!-- .element: class="fragment" data-fragment-index="2" -->
+          * Se usan los elementos propios del protocolo HTTP de una forma unificada en todas las APIS <!-- .element: class="fragment" data-fragment-index="3" -->
+          * La semántica de la comunicación con un API debe plantearse a partir de conceptos de negocio, pero 
+          ocultando la lógica del mismo <!-- .element: class="fragment" data-fragment-index="4" -->
+          * ReSTFul impone que las peticiones sean sin estado <!-- .element: class="fragment" data-fragment-index="5" -->
+        </script>
+      </section>
+    </section>
+    <section>
+      <section>
+        <h2>¿Cómo hacemos APIs ReST sin pasar vergüenza?</h2>
+      </section>
+
+      <section data-markdown>
+        <script type="text/template">
+          ## Modelo de maduración de Richardson
+          ![Modelo de maduración](https://martinfowler.com/articles/images/richardsonMaturityModel/overview.png)
+        </script>
+      </section>
+
+    </section>
+    <section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 0: The Swamp of POX
+          ![level0](./img/madurityModel-Level0.png)
+        </script>
+      </section>
+
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 0: The Swamp of POX
+          * Se utiliza HTTP como mero transporte de datos
+          * Se asemaja a llamadas a procedimientos remotos
+          * SOAP es un ejemplo de ello
+          * Se mezclan en la respuesta todo tipo de datos
+          * Se suele devolver un 200, incluso si hay errores
+          * Si hay errores, *aparece* un nodo ```errors``` en el que se detalla
+            lo que ha pasado realmente
+        </script>
+      </section>
+
+    </section>
+    <section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 1: Resources
+          ![level1](./img/madurityModel-Level1.png)
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 1: Resources
+          * En vez de en acciones, pensemos en nombres
+          * Estos nombres son recursos
+            + Entidades <!-- .element: class="fragment" data-fragment-index="1" -->
+            + Colecciones <!-- .element: class="fragment" data-fragment-index="2" -->
+            + Singletons <!-- .element: class="fragment" data-fragment-index="3" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Entidades
+          * Una entidad es una instancia de un determinado tipo 
+          * El API permite acceder a diferentes instancias de ese tipo <!-- .element: class="fragment" data-fragment-index="2" -->
+          * Una entidad estará compuesta de atributos y de un identificador <!-- .element: class="fragment" data-fragment-index="3" -->
+          * Una entidad siempre pertenece a una colección (en caso contrario sería un singleton) <!-- .element: class="fragment" data-fragment-index="4" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Singletons
+          * Un singletón es una entidad de cuyo tipo sólo existe una instancia
+          * No están contenidos en ninguna colección <!-- .element: class="fragment" data-fragment-index="1" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Colecciones
+          * Una colección agrupa varias entidades del mismo tipo
+          * Las colecciones pueden pertenecer a un ámbito (conjunto de recursos “padre”) <!-- .element: class="fragment" data-fragment-index="1" -->
+          * En caso de no asociarse a un ámbito se denominan recursos de primera clase <!-- .element: class="fragment" data-fragment-index="2" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Ejemplos
+          * /employees 
+            _colection_ <!-- .element: class="fragment" data-fragment-index="1" -->
+          * /accounts <!-- .element: class="fragment" data-fragment-index="2" -->
+            _colection_ <!-- .element: class="fragment" data-fragment-index="3" -->
+          * /products/31415926 <!-- .element: class="fragment" data-fragment-index="4" -->
+            _entity_ <!-- .element: class="fragment" data-fragment-index="5" -->
+          * /health  <!-- .element: class="fragment" data-fragment-index="6" -->
+            _singleton_ <!-- .element: class="fragment" data-fragment-index="7" -->
+          * /employees/InaKiReta/laptop  <!-- .element: class="fragment" data-fragment-index="8" -->
+            _entity_ <!-- .element: class="fragment" data-fragment-index="9" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Recurso vs. Representación
+          * El recurso es una idea abstracta
+          * Para que sea usable tiene que tener una representación concreta
+        </script>
+      </section>
+
+    </section>
+    <section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 2: HTTP Verbs
+          ![level2](./img/madurityModel-Level2.png)
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 2: HTTP Verbs
+          * HTTP es un protocolo rico con muchas cosas 
+          * Tenemos verbos para hacer distintas cosas <!-- .element: class="fragment" data-fragment-index="1" -->
+          * Tenemos cabeceras para utilizar <!-- .element: class="fragment" data-fragment-index="2" -->
+          * Tenemos statusCodes para dar más sentido a nuestras respuestas <!-- .element: class="fragment" data-fragment-index="3" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Disección de una petición en http
+          * verbo + uri + versión protocolo <!-- .element: class="fragment" data-fragment-index="1" -->
+          * headers <!-- .element: class="fragment" data-fragment-index="2" -->
+          * body <!-- .element: class="fragment" data-fragment-index="3" -->
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Verbos
+          * HTTP v1.1 [RFC 2616](https://tools.ietf.org/html/rfc2616) define:
+            + GET: <!-- .element: class="fragment" data-fragment-index="1" -->
+                  Means retrieve whatever information. 
+            + POST: <!-- .element: class="fragment" data-fragment-index="2" -->
+                  Is used to request that the origin server accept the
+                  entity enclosed in the request as a new subordinate of the 
+                  resource identified by the Request-URI in the Request-Line. 
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+            + DELETE:  
+                  Requests that the origin server delete the resource
+                  identified by the Request-URI.
+            + PUT: <!-- .element: class="fragment" data-fragment-index="1" -->
+                  Requests that the enclosed entity be stored under the
+                  supplied Request-URI.
+            + OPTIONS: <!-- .element: class="fragment" data-fragment-index="2" -->
+                  Represents a request for information about the
+                  communication options available on the request/response chain
+                  identified by the Request-URI.
+            + HEAD: <!-- .element: class="fragment" data-fragment-index="3" -->
+                  Is identical to GET except that the server MUST NOT
+                  return a message-body in the response.
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+            + TRACE: 
+                  Is used to invoke a remote, application-layer loop-
+                  back of the request message.
+            + CONNECT: <!-- .element: class="fragment" data-fragment-index="1" -->
+                  This specification reserves the method name CONNECT for use with a
+                  proxy that can dynamically switch to being a tunnel (e.g. SSL
+                  tunneling.
+          </script>
+      </section>  
+      <section data-markdown>
+        <script type="text/template">
+            + PATCH [RFC 5789](https://tools.ietf.org/html/rfc5789)
+                  Requests that a set of changes described in the
+                  request entity be applied to the resource identified 
+                  by the Request-URI.
+        </script>
+      </section>  
+      <section data-markdown>
+        <script type="text/template">
+          ### Métodos seguros e idempotentes
+          * Un método seguro es que el que no tiene efectos colaterales en el sistema <!-- .element: class="fragment" data-fragment-index="1" -->
+          * Un método idempotente cumple que $f(x) = x\ \forall x $ <!-- .element: class="fragment" data-fragment-index="2" -->
+        </script>
+      </section>  
+      <section data-markdown>
+        <script type="text/template">
+          | Verbo   |  Seguro  |  Idempotente  |
+          |--------:|:--------:|:-------------:|
+          | GET     |   √      |      √        |
+          | POST    |   x      |      x        |
+          | DELETE  |   x      |      √        |
+          | PUT     |   x      |      √        |
+          | PATCH   |   x      |      x        |
+        </script>
+      </section>  
+      <section data-markdown>
+        <script type="text/template">
+          ### Acceso a los recursos
+          * Siempre será con un verbo y un recurso asociado
+          * Plantear el acceso a colecciones completas
+          * Si hace falta operar sobre un subconjunto, se aplicarán filtros
+            + ```GET /employes?initials=InaKiReta```
+            + paginación, ordenación, ...
+              - ```GET /[...]?_pageSize=20\&_page=3\&_orderBy=name```
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Cabeceras
+          * Se utilizan para negociar opciones
+            + Host
+            + Location
+            + Content-type
+            + Accept
+            + Content-length
+            + Authorization
+            + ...
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Body
+          * Contenido de la petición
+          * Deberíamos ser honestos e indicar en el ```Content-type``` lo que estamos
+          enviando
+            + json
+            + xml
+            + html
+            + pdf
+            + ...
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          Ok, precioso, todo esto en cuanto a Request.<br>
+          Pero ¿y las respuestas?
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Responses
+          * Se componen de:
+            + versión http + _statusCode_ + _description_
+            + headers
+            + body
+          </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### StatusCode
+          * hay que utilizarlos con cabeza
+            + 1xx: informacional
+            + 2xx: ok
+            + 3xx: redirecciones
+            + 4xx: errores de cliente
+            + 500: errores de servidor
+
+          El detalle de los disponibles se encuentra en la propia 
+          [RFC](https://tools.ietf.org/html/rfc7231#section-6) del protocolo.
+        </script>
+      </section>
+
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 3: Hipermedia Controls
+          ![level3](./img/madurityModel-Level3.png)
+        </script>
+      </section>
+
+      <section data-markdown>
+        <script type="text/template">
+          ## Level 3: Hipermedia Controls
+          * HATEOAS (Hypertext As The Engine Of Application State)
+          * Hacer referencia a distintos recursos
+          * Autodescubrimiento de recursos
+        </script>
+      </section>
+      
+      <section data-markdown>
+        <script type="text/template">
+          ### Ejemplo
+          ```
+          > GET /books/ElQuijote HTTP/1.1
+          > Accept: "application/json"
+
+          < HTTP/1.1 200 OK
+          < Content-Type: "application/json"
+          < Content-Length: 317
+          < Date: Mon, 19 Mar 2018 12:21:23 GMT
+          <
+          <{
+          <  "title": "Don Quijote de la Mancha",
+          <  "author": "Miguel de Cervantes Saavedra"
+          <  "abstract": "Es la historia de un hidalgo de la Mancha de unos 
+          <        50 años que tras leer muchos libros de caballería, 
+          <        un género popular en siglo XVI, decide disfrazarse de 
+          <        caballero andante y embarcarse en una serie de aventuras."
+          <}
+          ```
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Ejemplo Level3
+          ```
+          > GET /books/ElQuijote HTTP/1.1
+          > Accept: "application/json"
+
+          < HTTP/1.1 200 OK
+          < Content-Type: "application/json"
+          < Content-Length: 317
+          < Date: Mon, 19 Mar 2018 12:21:23 GMT
+          <
+          <{
+          <  "title": "Don Quijote de la Mancha",
+          <  "abstract": "Es la historia de un hidalgo[...]."",
+          <  "_links": [
+          <     { "self": 
+          <       { "href": "https://alejandria.io/books/ElQuijote"}
+          <     { "author": 
+          <       { "href": "https://alejandria.io/authors/MiguelDeCervantesSaavedra"}
+          <     },{ "cover": 
+          <       { "href": "https://alejandria.io/books/ElQuijote/cover"}
+          <     }
+          <   ]
+          <  
+          <}
+          ```
+        </script>
+      </section>      
+
+      <section data-markdown>
+      <script type="text/template">
+        ### ¿Qué aporta cada nivel?
+        * Level 1: Resuelve la cuestión del manejo de la complejidad mediante el uso 
+          de divide y vencerás, dividiendo un punto final de servicio grande en múltiples 
+          recursos.  <!-- .element: class="fragment" data-fragment-index="1" -->
+        * Level 2: Introduce un conjunto estándar de verbos para que manejemos situaciones 
+          similares de la misma manera, eliminando variaciones innecesarias. <!-- .element: class="fragment" data-fragment-index="2" -->
+        * Level 3: Introduce la capacidad de descubrimiento, proporcionando una forma de
+          hacer que un protocolo sea más autodocumentado. <!-- .element: class="fragment" data-fragment-index="3" -->
+        </script>
+      </section>
+    </section>
+
+    <section data-markdown>
+      <script type="text/template">
+        ### Versionado de API
+        * es un tema delicado y no hay solución buena
+          + a nivel de recurso:
+          + a nivel de URI 
+            - /v1/books
+          + a nivel de header: 
+            -  ```api-version: "v1"```
+            - ```Accept: application/vnd.alejadria-v1+json```
+      </script>
+    </section>
+
+    <section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Buenas Prácticas
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Nomenclatura
+            * minúsculas para los recursos
+            * nombres en plural para las colecciones
+            * identificadores con sentido para el consumidor cuando sea posible
+            * estándares de representación: iso8601, iso4217, ...
+            * kebab-case para definir URIs
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          * queryString en camelCase
+          * preceder de un guión bajo los parámetros de naturaleza técnica no relacionados con el negocio.
+                GET /empleados?primerApellido=García&_orden=cif
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Body
+          * JSON y XML como formato de datos estructurado
+            + negociable con la cabecera ```Accept```
+          * utilizar los tipos de datos adecuados: number, string, boolean, ...
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Uris
+          * / puede ser un listado de las colecciones y singletons 
+            disponibles
+          * si la información recuperada es compleja, define subniveles
+            + GET /customers/123$\ \Rightarrow \times$ 
+            + GET /customers/123/address$\ \Rightarrow \checkmark$
+            + GET /customers/123/personal-info$\ \Rightarrow \checkmark$
+            + GET /customers/123/invoce-info$\ \Rightarrow \checkmark$
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Contenido
+          La negociación del contenido debe hacerse:
+          * con cabeceras ```Accept```$\ \Rightarrow \checkmark$
+          * con la URI ```/clientes/1.xml```$\ \Rightarrow \times$ 
+        </script>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Proyecciones
+          * puede usarse queryString
+            + /books?_fields=title,isbn,abstract
+          * utiliza librerías específicas
+            + graphQL
+        </script>
+      </section>
+    </section>
+
+    <section>
+      <section data-markdown>
+        <script type="text/template">
+          ### Ciclo de vida de un api
+          ![ciclo de vida](./img/api-life-cicle.png)
+        </script>
+      </section>
+    </section>
+
+    <section>
+      <section data-markdown>
+        <script type="text/template">
+          ## Api managers
+
+          ### ¿Para qué lo queremos?
+          * La función principal es la de ofrecer una gestión de
+          ciclo de vida del API
+          * También permite llevar un control de uso de las mismas
+          * Suelen ofrecer un portal para el desarrollador
+        </script>
+      </section>
+
+      <section data-markdown>
+        <script type="text/template">
+          [Demo WSO2](https://panoramix.sngdev.com/publisher)
+        </script>
+      </section>      
+    </section>
+
+    <section data-markdown>
+      <script type="text/template">
+        ## Bibliografía
+        * [Modelo de maduración de Richardson](https://martinfowler.com/articles/richardsonMaturityModel.html)
+        * [RFC 2616 - HTTP](https://tools.ietf.org/html/rfc2616)
+        * [WSO2-AM](https://wso2.com/api-management/)
+        * [ReST tutorial](http://www.restapitutorial.com/)
+        * [Exponer interfaces ReST sin pasar vergüenza](https://docs.google.com/presentation/d/1eVvchTGA3EOCHZwBbKjMKhxd9LaXjYQTnzeeUziSU6M/edit#slide=id.g313786a36c_0_10)
+      </script>
+    </section>
+
+    <section>
+      <h1> ReST...</h1>
+      <h2> in peace </h2>
+    </section>
+
+  </div>
+  </div>
+  <script type="text/javascript" src="node_modules/reveal.js/lib/js/head.min.js"></script>
+  <script type="text/javascript" src="node_modules/reveal.js/js/reveal.js"></script>
+
+  <script>
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+          controls: true,
+          progress: true,
+          history: true,
+          keyboard: true,
+          center: true,
+          hideAddressBar: true,
+
+          theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+          transition: Reveal.getQueryHash().transition || 'concave', // default/cube/page/concave/zoom/linear/none
+
+          math: {
+            // mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+            config: 'TeX-AMS_HTML-full'
+          },
+
+          dependencies: [
+  					{ src: 'node_modules/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+  					{ src: 'node_modules/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'node_modules/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'node_modules/reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+  					{ src: 'node_modules/reveal.js/plugin/notes/notes.js' },
+            { src: 'node_modules/reveal.js/plugin/math/math.js', async: true }
+  				]
+      });
+  </script>
+</body>
+</html>
